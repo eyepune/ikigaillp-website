@@ -6,6 +6,44 @@ import { ArrowRight, Users, Award, Target, Heart } from "lucide-react";
 import { useLang } from "../components/LanguageContext";
 import { t } from "../components/i18n";
 
+const fallbackTeam = [
+  {
+    id: "ashly",
+    name: "Ashly Varma",
+    role: "Founder & Lead Facilitator",
+    bio: "Engineer and coach with 5+ years of experience in Digital Marketing, certified AI & ML coach, Salesforce. Focused on transforming lives through Quality Education.",
+    photo: "/team/ashly.webp"
+  },
+  {
+    id: "gaukarn",
+    name: "Gaukarn Thakur",
+    role: "Co founder",
+    bio: "Specializes in helping individuals align career choices with core values and long-term aspirations through evidence-based frameworks.",
+    photo: "/team/gaukarn.webp"
+  },
+  {
+    id: "amit",
+    name: "Amit Verma",
+    role: "COO",
+    bio: "A B.Tech Computer Science graduate with a decade of experience working in IT companies in India and abroad. Currently teaching students for competitive exams and providing career counselling.",
+    photo: "/team/amit.webp"
+  },
+  {
+    id: "sneha",
+    name: "Sneha Surti",
+    role: "Head of Training & Management",
+    bio: "As a seasoned Trainer and Educator, Sneha specializes in designing and delivering high-impact learning experiences that drive both individual growth and organizational success.",
+    photo: "/team/sneha.webp"
+  },
+  {
+    id: "stanford",
+    name: "Stanford D'souza",
+    role: "VP Marketing",
+    bio: "Results-driven business leader with over 12 years of experience in client engagement, operations, and strategic marketing. Leads the Microsoft & Enterprise vertical at ID8NXT.",
+    photo: "/team/stanford.webp"
+  }
+];
+
 const memberColors = ["#e84c1e", "#1e7a78", "#2d8a4e", "#e8b429", "#9b5e91", "#e84c1e"];
 
 export default function About() {
@@ -22,6 +60,15 @@ export default function About() {
   ];
 
   useEffect(() => {
+    const localize = (m) => {
+      if (lang === 'en') return m;
+      return {
+        ...m,
+        role: m.role_hi || m.role,
+        bio: m.bio_hi || m.bio,
+      };
+    };
+
     const fetchTeam = async () => {
       try {
         const { data, error } = await supabase
@@ -32,18 +79,11 @@ export default function About() {
         
         if (error) throw error;
 
-        const localize = (m) => {
-          if (lang === 'en') return m;
-          return {
-            ...m,
-            role: m.role_hi || m.role,
-            bio: m.bio_hi || m.bio,
-          };
-        };
-
-        setTeam((data || []).map(localize));
+        const finalTeam = (data && data.length > 0) ? data : fallbackTeam;
+        setTeam(finalTeam.map(localize));
       } catch (error) {
         console.error('Error fetching team:', error);
+        setTeam(fallbackTeam.map(localize));
       }
     };
     fetchTeam();
