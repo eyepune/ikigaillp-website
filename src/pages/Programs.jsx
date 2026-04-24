@@ -6,7 +6,7 @@ import { useLang } from "../components/LanguageContext";
 import { t } from "../components/i18n";
 import { supabase } from "@/lib/supabaseClient";
 
-const staticPrograms = {
+export const staticPrograms = {
   en: [
     { slug: "personality-development", icon: "🧠", title: "Personality Development", tagline: "Know yourself. Grow yourself.", desc: "Deep self-awareness sessions that help you understand your strengths, habits, and blind spots — so you can grow with genuine confidence.", duration: "8–12 weeks", format: "Group & 1-on-1", suitable: "Students, Professionals", color: "#e84c1e" },
     { slug: "public-speaking", icon: "🎤", title: "Public Speaking & Communication", tagline: "From stage fright to standing ovations.", desc: "We train you to express ideas with clarity, conviction, and lasting impact — in rooms of 5 or 500.", duration: "6–10 weeks", format: "Workshops & Practice", suitable: "All levels", color: "#1e7a78" },
@@ -25,7 +25,7 @@ const staticPrograms = {
   ],
 };
 
-const staticCourseCategories = [
+export const staticCourseCategories = [
   {
     category: "Software Development",
     color: "#1e7a78",

@@ -27,6 +27,9 @@ const TABS = [
   { id: "invite",        label: "Admins",        icon: UserPlus,         group: "data" },
 ];
 
+import { staticPrograms, staticCourseCategories } from "./Programs";
+import { fallbackTeam } from "./About";
+
 export default function AdminPanel() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +38,84 @@ export default function AdminPanel() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSync = async () => {
+    if (!confirm("This will import all static programs, courses, and team members into Supabase. Continue?")) return;
+    setSyncing(true);
+    try {
+      // 1. Sync Programs
+      const programsToInsert = staticPrograms.en.map((p, i) => {
+        const hi = staticPrograms.hi.find(h => h.slug === p.slug) || {};
+        return {
+          slug: p.slug,
+          title: p.title,
+          title_hi: hi.title,
+          tagline: p.tagline,
+          tagline_hi: hi.tagline,
+          description: p.desc,
+          description_hi: hi.desc,
+          icon: p.icon,
+          color: p.color,
+          sort_order: i,
+          status: 'active'
+        };
+      });
+
+      // 2. Sync Courses (flatten categories)
+      const coursesToInsert = [];
+      staticCourseCategories.forEach((cat, catIdx) => {
+        cat.courses.forEach((c, i) => {
+          coursesToInsert.push({
+            slug: c.slug,
+            title: c.title,
+            category: cat.category,
+            description: c.desc,
+            icon: c.icon,
+            color: cat.color,
+            sort_order: (catIdx * 100) + i,
+            status: 'active'
+          });
+        });
+      });
+
+      // 3. Sync Team
+      const teamToInsert = fallbackTeam.map((m, i) => ({
+        name: m.name,
+        role: m.role,
+        bio: m.bio,
+        photo: m.photo,
+        sort_order: i,
+        status: 'active'
+      }));
+
+      // Execute Inserts (Upsert to avoid duplicates if slug exists)
+      const results = await Promise.all([
+        supabase.from('programs').upsert(programsToInsert, { onConflict: 'slug' }),
+        supabase.from('courses').upsert(coursesToInsert, { onConflict: 'slug' }),
+        supabase.from('team_members').upsert(teamToInsert, { onConflict: 'name' }) // Use name as conflict for team
+      ]);
+
+      const errors = results.filter(r => r.error);
+      if (errors.length > 0) {
+        console.error('Sync errors:', errors);
+        const tableMissing = errors.some(e => e.error.code === 'PGRST204' || e.error.code === 'PGRST205');
+        if (tableMissing) {
+          alert("DATABASE TABLES MISSING: Please run the SQL setup script in your Supabase SQL Editor first!");
+        } else {
+          alert("Some errors occurred during sync. Check console.");
+        }
+      } else {
+        alert("Synchronization successful! All static data has been imported to your database.");
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error('Sync failed:', err);
+      alert("Sync failed: " + err.message);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   useEffect(() => {
     const h = () => setIsMobile(window.innerWidth < 1024);
@@ -49,9 +130,6 @@ export default function AdminPanel() {
         if (!session) { window.location.href = createPageUrl("AdminLogin"); return; }
         
         const u = session.user;
-        // Simplified role check for now - assuming metadata contains role or handled by RLS
-        // if (!u || u.user_metadata?.role !== "admin") { window.location.href = createPageUrl("Home"); return; }
-        
         setUser(u);
         const [programsResult, teamResult, blogsResult, contactsResult] = await Promise.all([
           supabase.from('programs').select('*'),
@@ -263,7 +341,7 @@ export default function AdminPanel() {
 
         {/* Content */}
         <main style={{ flex: 1, padding: isMobile ? 14 : 24, overflowY: "auto", paddingBottom: 32 }}>
-          {activeTab === "overview"     && <OverviewTab stats={stats} setActiveTab={setActiveTab} user={user} />}
+          {activeTab === "overview"     && <OverviewTab stats={stats} setActiveTab={setActiveTab} user={user} handleSync={handleSync} syncing={syncing} />}
           {activeTab === "programs"     && <AdminPrograms />}
           {activeTab === "courses"      && <AdminCourses />}
           {activeTab === "azure900"     && <AdminAzure900 />}
@@ -278,7 +356,7 @@ export default function AdminPanel() {
   );
 }
 
-function OverviewTab({ stats, setActiveTab, user }) {
+function OverviewTab({ stats, setActiveTab, user, handleSync, syncing }) {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
@@ -326,7 +404,7 @@ function OverviewTab({ stats, setActiveTab, user }) {
       </div>
 
       {/* Quick Actions */}
-      <div style={{ background: "#0a1510", borderRadius: 14, padding: "18px", border: "1px solid rgba(255,255,255,0.06)" }}>
+      <div style={{ background: "#0a1510", borderRadius: 14, padding: "18px", border: "1px solid rgba(255,255,255,0.06)", marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
           <Zap size={14} style={{ color: "#e84c1e" }} />
           <h3 style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: 0 }}>Quick Actions</h3>
@@ -340,6 +418,32 @@ function OverviewTab({ stats, setActiveTab, user }) {
               <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 600, fontSize: 11 }}>{a.label}</span>
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Database Tools */}
+      <div style={{ background: "rgba(232,76,30,0.03)", borderRadius: 14, padding: "18px", border: "1px dashed rgba(232,76,30,0.2)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+          <Cloud size={14} style={{ color: "#e84c1e" }} />
+          <h3 style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: 0 }}>Database Tools</h3>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, margin: 0 }}>
+            If your dashboard is empty, use this tool to import all programs, courses, and team members from the website's static files into your Supabase database.
+          </p>
+          <button 
+            onClick={handleSync}
+            disabled={syncing}
+            style={{ 
+              flexShrink: 0, padding: "10px 20px", borderRadius: 100, border: "none", 
+              background: syncing ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #e84c1e, #c52d0a)", 
+              color: "white", fontSize: 13, fontWeight: 700, cursor: syncing ? "default" : "pointer",
+              boxShadow: syncing ? "none" : "0 4px 12px rgba(232,76,30,0.3)",
+              display: "flex", alignItems: "center", gap: 8
+            }}
+          >
+            {syncing ? <><div style={{ width: 12, height: 12, border: "2px solid rgba(255,255,255,0.2)", borderTopColor: "white", borderRadius: "50%", animation: "spin 1s linear infinite" }} /> Syncing...</> : <><Cloud size={14} /> Sync Site Data</>}
+          </button>
         </div>
       </div>
     </div>

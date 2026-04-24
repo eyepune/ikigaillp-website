@@ -6,7 +6,7 @@ import { ArrowRight, Users, Award, Target, Heart } from "lucide-react";
 import { useLang } from "../components/LanguageContext";
 import { t } from "../components/i18n";
 
-const fallbackTeam = [
+export const fallbackTeam = [
   {
     id: "ashly",
     name: "Ashly Varma",
