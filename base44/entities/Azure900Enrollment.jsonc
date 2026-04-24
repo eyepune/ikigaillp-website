@@ -1,0 +1,68 @@
+{
+  "name": "Azure900Enrollment",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "college": {
+      "type": "string",
+      "description": "College / Institute Name"
+    },
+    "age": {
+      "type": "number"
+    },
+    "department": {
+      "type": "string",
+      "description": "Department / Specialization"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "English",
+        "Hindi",
+        "Marathi",
+        "Tamil"
+      ],
+      "description": "Language Preference"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewed",
+        "admitted"
+      ],
+      "default": "new"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "phone"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
