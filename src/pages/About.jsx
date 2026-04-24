@@ -12,35 +12,35 @@ const fallbackTeam = [
     name: "Ashly Varma",
     role: "Founder & Lead Facilitator",
     bio: "Engineer and coach with 5+ years of experience in Digital Marketing, certified AI & ML coach, Salesforce. Focused on transforming lives through Quality Education.",
-    photo: "/team/ashly.webp"
+    photo: "https://base44.app/api/apps/69a1ffff704da6ffef51cd18/files/mp/public/69a1ffff704da6ffef51cd18/0dd370dff_1000060617.jpg"
   },
   {
     id: "gaukarn",
     name: "Gaukarn Thakur",
     role: "Co founder",
     bio: "Specializes in helping individuals align career choices with core values and long-term aspirations through evidence-based frameworks.",
-    photo: "/team/gaukarn.webp"
+    photo: "https://base44.app/api/apps/69a1ffff704da6ffef51cd18/files/public/69a1ffff704da6ffef51cd18/356aafc70_1000047812.jpg"
   },
   {
     id: "amit",
     name: "Amit Verma",
     role: "COO",
     bio: "A B.Tech Computer Science graduate with a decade of experience working in IT companies in India and abroad. Currently teaching students for competitive exams and providing career counselling.",
-    photo: "/team/amit.webp"
+    photo: "https://base44.app/api/apps/69a1ffff704da6ffef51cd18/files/public/69a1ffff704da6ffef51cd18/cca86830b_1000058663.jpg"
   },
   {
     id: "sneha",
     name: "Sneha Surti",
     role: "Head of Training & Management",
-    bio: "As a seasoned Trainer and Educator, Sneha specializes in designing and delivering high-impact learning experiences that drive both individual growth and organizational success.",
-    photo: "/team/sneha.webp"
+    bio: "As a seasoned Trainer and Educator, Sneha specializes in designing and delivering high-impact learning experiences that drive both individual growth and organizational success. She has empowered professionals across industries for almost 20 years.",
+    photo: "https://base44.app/api/apps/69a1ffff704da6ffef51cd18/files/mp/public/69a1ffff704da6ffef51cd18/cea855120_1000061776.jpg"
   },
   {
     id: "stanford",
     name: "Stanford D'souza",
     role: "VP Marketing",
     bio: "Results-driven business leader with over 12 years of experience in client engagement, operations, and strategic marketing. Leads the Microsoft & Enterprise vertical at ID8NXT.",
-    photo: "/team/stanford.webp"
+    photo: "https://base44.app/api/apps/69a1ffff704da6ffef51cd18/files/mp/public/69a1ffff704da6ffef51cd18/7cf6b1579_1000059762.jpg"
   }
 ];
 
